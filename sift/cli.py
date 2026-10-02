@@ -100,7 +100,7 @@ def cmd_reviews(args, games, client, con) -> int:
                 slices = w.slices()
                 per_slice = max(1, per_window // len(slices))
                 total = 0
-                print(f"{g['name']} | {w.label}: collecting ({len(slices)} weekly slices, up to {per_slice} each)", flush=True)
+                print(f"{g['name']} | {w.label}: collecting ({len(slices)} days, up to {per_slice} reviews per day)", flush=True)
                 for sl in slices:
                     have = 0
                     if sl.start is not None:
@@ -122,7 +122,7 @@ def cmd_reviews(args, games, client, con) -> int:
                     except Exception as exc:  # keep going; the rerun picks up missing slices
                         msg = f"{g['name']} | {w.label} | slice from {sl.start}: {exc}"
                         summary["errors"].append(msg)
-                        print(f"   problem, skipping this week for now: {exc}", flush=True)
+                        print(f"   problem, skipping this day for now: {exc}", flush=True)
                     store.upsert_records(con, batch)
                     total += len(batch)
                 print(f"{g['name']} | {w.label}: {total} reviews", flush=True)
@@ -135,7 +135,7 @@ def cmd_reviews(args, games, client, con) -> int:
         path = store.write_run_summary(summary)
         print(f"Run summary saved: {path}")
         if summary["errors"]:
-            print(f"{len(summary['errors'])} weeks had problems. Run the same command again to fill them in.")
+            print(f"{len(summary['errors'])} days had problems. Run the same command again to fill them in.")
     return 0
 
 
@@ -172,21 +172,91 @@ def cmd_stats(args, games, client, con) -> int:
     return 0
 
 
+def cmd_topics(args, games, client, con) -> int:
+    from . import topics
+    from .llm import Claude
+
+    claude = None if args.no_labels else Claude(max_tokens=200)
+    if claude:
+        print(f"Using Claude model: {claude.model}")
+    labeler = topics.claude_labeler(claude) if claude else None
+    out = {}
+    for g in games:
+        print(f"{g['name']}: finding topics...", flush=True)
+        found = topics.build_topics(con, g["appid"], labeler=labeler)
+        out[g["name"]] = found
+        print(f"\n{g['name']}  ({len(found)} topics)")
+        print(f"  {'topic':<40} {'reviews':>7} {'% positive':>11} {'before':>7} {'after':>6}")
+        for label, size, pct, nb, na in topics.topic_report(con, g["appid"]):
+            print(f"  {label[:40]:<40} {size:>7} {pct:>10}% {nb:>7} {na:>6}")
+        print(flush=True)
+    summary = topics.run_summary(out, claude)
+    path = store.write_run_summary(summary)
+    if claude:
+        print(f"Claude usage: {claude.input_tokens} input tokens, {claude.output_tokens} output tokens")
+    print(f"Run summary saved: {path}")
+    return 0
+
+
+def cmd_ask(args, games, client, con) -> int:
+    import json
+    from pathlib import Path
+
+    from .agent import Agent
+    from .llm import Claude
+
+    if not args.question:
+        sys.exit('Type your question in quotes, e.g. python -m sift ask "Why did players turn on Helldivers 2?"')
+    claude = Claude(max_tokens=1200, families=("sonnet", "haiku", "opus"))
+    print(f"Using Claude model: {claude.model}. Building search index...", flush=True)
+    agent = Agent(con, claude)
+    ans = agent.ask(args.question)
+    print("\n" + ans.text + "\n")
+    print(f"Citations: {len(ans.cited)} cited, {len(ans.verified)} verified against the database")
+    if ans.unverified:
+        print(f"  NOT verified (Claude cited an ID it was never shown): {', '.join(ans.unverified)}")
+    print("Tools used: " + ", ".join(c["tool"] for c in ans.tool_calls))
+    print(f"Tokens: {ans.input_tokens} in, {ans.output_tokens} out"
+          + (f" (stopped early: {ans.stopped_early})" if ans.stopped_early else ""))
+    log = Path("data/runs/answers.jsonl")
+    log.parent.mkdir(parents=True, exist_ok=True)
+    with log.open("a") as f:
+        f.write(json.dumps({"at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+                            "model": claude.model, **ans.__dict__}) + "\n")
+    print(f"Saved to {log}")
+    return 0
+
+
+def cmd_export(args, games, client, con) -> int:
+    from .export import export
+
+    result = export(con)
+    for name, size in sorted(result["files"].items()):
+        print(f"  public_data/{name:<24} {size / 1_000_000:6.1f} MB")
+    print(f"Example answers included: {result['examples']}")
+    return 0
+
+
 COMMANDS = {
     "verify": cmd_verify,
     "news": cmd_news,
     "patches": cmd_patches,
     "reviews": cmd_reviews,
     "stats": cmd_stats,
+    "topics": cmd_topics,
+    "ask": cmd_ask,
+    "export": cmd_export,
 }
 
 
 def main(argv: list[str] | None = None) -> int:
     p = argparse.ArgumentParser(prog="sift", description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument("command", choices=COMMANDS)
+    p.add_argument("question", nargs="?", help='ask: your question, in quotes')
     p.add_argument("--game", type=int, help="limit to one Steam app ID")
     p.add_argument("--config", type=Path, default=Path("config/games.toml"))
     p.add_argument("--db", type=Path, default=store.DEFAULT_DB)
+    p.add_argument("--no-labels", action="store_true", help="topics: skip Claude labels (offline test)")
     p.add_argument("--fresh", action="store_true", help="reviews: delete stored reviews first and pull again")
     p.add_argument("--all", action="store_true", help="patches: show every announcement, not just likely patches")
     p.add_argument("-v", "--verbose", action="store_true")

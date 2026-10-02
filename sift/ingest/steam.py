@@ -34,7 +34,7 @@ PATCH_TITLE = re.compile(
 
 
 class SteamClient:
-    def __init__(self, min_interval: float = 1.5, max_retries: int = 5, timeout: int = 30):
+    def __init__(self, min_interval: float = 2.0, max_retries: int = 6, timeout: int = 30):
         self.session = requests.Session()
         self.session.headers["User-Agent"] = USER_AGENT
         self.min_interval = min_interval
@@ -57,6 +57,12 @@ class SteamClient:
                     return resp.json()
                 if resp.status_code not in (429, 500, 502, 503, 504):
                     resp.raise_for_status()
+                if resp.status_code == 429:
+                    # Steam is asking us to slow down: back off for longer each time.
+                    pause = min(180, 30 * (attempt + 1))
+                    print(f"   Steam asked us to slow down, waiting {pause} seconds...", flush=True)
+                    time.sleep(pause)
+                    continue
                 log.warning("HTTP %s, attempt %d", resp.status_code, attempt + 1)
             time.sleep(min(60, 2 ** (attempt + 1)))
         raise RuntimeError(f"giving up on {url} after {self.max_retries} attempts")
@@ -148,8 +154,8 @@ class Window:
             return None
         return "before" if ts < self.patch else "after"
 
-    def slices(self, days: int = 7) -> list["Window"]:
-        """Split into fixed-length slices so sampling is spread evenly over time.
+    def slices(self, days: int = 1) -> list["Window"]:
+        """Split into day-long slices so sampling is spread evenly over time.
 
         Steam returns reviews newest first, so sampling a whole window with one cap
         would fill up on the last few days and miss the weeks before the patch.

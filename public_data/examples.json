@@ -1,0 +1,38 @@
+[
+  {
+    "question": "Why did Helldivers 2 players turn negative after the Account Linking Update?",
+    "text": "Players turned negative mainly because of Sony's mandatory PSN account linking and the delisting of the game in countries without PSN. Positive reviews fell from 88.0% before the patch to 77.4% after. The sample is 1,617 reviews before and 1,694 after [stats].\n\n- **Theme growth:** Reviews about mandatory PSN linking and Sony data breaches rose from 2.9% to 7.2% of reviews. Reviews about the PSN requirement and regional delisting rose from 2.0% to 5.8% [stats].\n- **Forced linking:** Reviewers said they would keep their review negative until the requirement was dropped. Some objected to agreeing to new legal terms months after release [steam:553850:165313398] [steam:553850:164603804]. One said the requirement would \"kill the game from a ton of countries\" [steam:553850:164603788].\n- **Delisting after the rollback:** Many negative reviews came after Sony reversed the requirement. They said the game was still delisted in countries without PSN [steam:553850:165378293] [steam:553850:165561952] [steam:553850:165561591].\n- **Players locked out:** Reviewers said people who bought the game before the requirement still couldn't play [steam:553850:165312789]. Another feared bans for region-lock evasion [steam:553850:165823035].\n- **Distrust of Sony:** Reviewers expected Sony to try again and doubted its customer service. One had hit repeated errors when trying to link [steam:553850:165312789] [steam:553850:164390220].\n\nThese are the themes that grew most in the sample. Gameplay themes such as co-op and crashes shrank slightly as a share of reviews, so the drop isn't tied to gameplay [stats].",
+    "cited": [
+      "steam:553850:165313398",
+      "steam:553850:164603804",
+      "steam:553850:164603788",
+      "steam:553850:165378293",
+      "steam:553850:165561952",
+      "steam:553850:165561591",
+      "steam:553850:165312789",
+      "steam:553850:165823035",
+      "steam:553850:164390220"
+    ],
+    "model": "claude-sonnet-5-5",
+    "input_tokens": 5505,
+    "output_tokens": 833
+  },
+  {
+    "question": "What did No Man's Sky players say changed after the Foundation Update?",
+    "text": "Players mostly said the Foundation Update made the game much better. Reviews were 47.9% positive before it and 71.7% after [stats]. The reviews I checked also show some holdouts who found the update shallow or hit technical problems.\n\n- **Overall sentiment:** The \"Foundation and NEXT updates improve game significantly\" theme rose from 2.4% to 14.1% of reviews [stats]. One reviewer said it \"changed everything about the game\" [steam:275850:28192882].\n- **Base building:** Mentions of base building and multiplayer features rose from 2.0% to 5.9% of reviews [stats]. Players said they were enjoying base building and managing their economy [steam:275850:28164582]. Others called base building the main addition [steam:275850:27895035].\n- **Quality-of-life and technical changes:** Reviewers listed freighter storage, item stacking, planet scanning from space, waypoints, beacons, teleports, and optional visual options like motion blur and TAA [steam:275850:27894873]. Another reported better framerate and performance [steam:275850:27895035]. One review also mentioned two new game modes [steam:275850:27992059].\n- **Price:** Some now recommend the game but only on sale. One said it is probably still not worth $60 [steam:275850:27992059]. Another recommended it at about 50% off combined with the update [steam:275850:28603833].\n- **Remaining complaints:** One reviewer called the update \"pretty shallow\" [steam:275850:27997548]. Another couldn't start the game and got stuck on Loading Shaders [steam:275850:28198505]. Another still felt it lacked content and didn't deliver on its promises [steam:275850:28281938].\n\nThese are Steam reviews sampled around the patch, so they show what reviewers chose to mention, not a full list of the update's changes.",
+    "cited": [
+      "steam:275850:28192882",
+      "steam:275850:28164582",
+      "steam:275850:27895035",
+      "steam:275850:27894873",
+      "steam:275850:27992059",
+      "steam:275850:28603833",
+      "steam:275850:27997548",
+      "steam:275850:28198505",
+      "steam:275850:28281938"
+    ],
+    "model": "claude-sonnet-5-5",
+    "input_tokens": 10363,
+    "output_tokens": 1072
+  }
+]

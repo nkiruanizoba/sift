@@ -116,7 +116,7 @@ def test_slices_cover_window_evenly():
     game = {"appid": 1, "name": "g", "days_before": 21, "days_after": 21,
             "major_patches": [{"date": "2024-05-03", "label": "P"}]}
     (w,) = steam.windows_for_game(game)
-    sl = w.slices()
+    sl = w.slices(days=7)
     assert sl[0].start == w.start and sl[-1].end == w.end
     assert all(a.end < b.start for a, b in zip(sl, sl[1:]))
     assert len(sl) == 7
@@ -125,7 +125,7 @@ def test_slices_cover_window_evenly():
 
 def test_cmd_reviews_tags_side_and_reruns_cheaply(tmp_path, monkeypatch, capsys):
     from sift import cli
-    game = {"appid": 9, "name": "g", "max_reviews": 4, "days_before": 7, "days_after": 6,
+    game = {"appid": 9, "name": "g", "max_reviews": 28, "days_before": 7, "days_after": 6,
             "major_patches": [{"date": "2025-03-10", "label": "P"}]}
 
     class SliceClient:
@@ -148,7 +148,7 @@ def test_cmd_reviews_tags_side_and_reruns_cheaply(tmp_path, monkeypatch, capsys)
     cli.cmd_reviews(A(), [game], SliceClient(), con)
     sides = dict(con.execute(
         "SELECT metadata->>'sample_side', count(*) FROM records GROUP BY 1").fetchall())
-    assert sides == {"before": 2, "after": 2}
+    assert sides == {"before": 7 * 2, "after": 7 * 2}
     first = SliceClient.calls
     cli.cmd_reviews(A(), [game], SliceClient(), con)
     assert SliceClient.calls == first  # nothing refetched on rerun
