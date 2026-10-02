@@ -64,6 +64,10 @@ st.markdown("""
   div[role="tablist"] > [role="tab"] {flex: 1 1 0 !important; justify-content: center !important;
                                             text-align: center !important; padding: 10px 0 !important; margin: 0 !important;}
   div[role="tablist"] > [role="tab"] p {font-size: 1.08rem !important; font-weight: 600 !important;}
+  @media (max-width: 760px) {
+    div[role="tablist"] > [role="tab"] {padding: 8px 4px !important;}
+    div[role="tablist"] > [role="tab"] p {font-size: 0.9rem !important; white-space: nowrap !important;}
+  }
 </style>""", unsafe_allow_html=True)
 
 
@@ -228,14 +232,25 @@ with tab_ask:
             with st.spinner("Searching reviews and checking numbers..."):
                 client = Claude(key=key, max_tokens=1200, families=("sonnet", "haiku", "opus"))
                 ans = Agent(db(), client, index=search_index()).ask(q.strip())
-            st.markdown(ans.text)
-            if ans.unverified:
-                st.warning(f"{len(ans.unverified)} cited ID(s) could not be verified: {', '.join(ans.unverified)}")
-            else:
-                st.success(f"All {len(ans.verified)} cited reviews verified against the database.")
-            show_sources(ans.cited, set(ans.verified))
-            st.caption(f"Tools used: {', '.join(c['tool'] for c in ans.tool_calls)} · "
-                       f"{ans.input_tokens:,} input and {ans.output_tokens:,} output tokens · model {client.model}")
+            # Keep the answer so it stays on screen after the page refreshes,
+            # then refresh once so the "questions left" count is up to date.
+            st.session_state["last_answer"] = {
+                "question": q.strip(), "text": ans.text, "cited": ans.cited,
+                "verified": list(ans.verified), "unverified": list(ans.unverified),
+                "meta": (f"Tools used: {', '.join(c['tool'] for c in ans.tool_calls)} · "
+                         f"{ans.input_tokens:,} input and {ans.output_tokens:,} output tokens · model {client.model}"),
+            }
+            st.rerun()
+    last = st.session_state.get("last_answer")
+    if key and last:
+        st.markdown(f"**Your question:** {md(last['question'])}")
+        st.markdown(last["text"])
+        if last["unverified"]:
+            st.warning(f"{len(last['unverified'])} cited ID(s) could not be verified: {', '.join(last['unverified'])}")
+        else:
+            st.success(f"All {len(last['verified'])} cited reviews verified against the database.")
+        show_sources(last["cited"], set(last["verified"]))
+        st.caption(last["meta"])
 
 # ------------------------------------------------------------------ Patches
 

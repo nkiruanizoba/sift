@@ -2,7 +2,7 @@
 
 **Ask questions of messy text, get answers you can check.**
 
-> Status: in development, public launch October 2026.
+**Try it:** [sift-insights.streamlit.app](https://sift-insights.streamlit.app/)
 
 Sift is an agentic insights engine. You ask a question in plain language, for example "Why did player sentiment drop after the last major patch?" Sift searches and clusters the underlying records and answers with citations that link back to the exact sources, so every claim can be checked.
 
@@ -40,7 +40,7 @@ Results will be published here and in the app once the eval runs.
 - [x] Steam review ingest and topic clustering
 - [x] Agent with search, compare, and topic trend tools, plus citation checking
 - [ ] 30-question eval and results page
-- [ ] Public app
+- [x] Public app
 - [ ] CI dataset (Godot) and CI health metrics
 
 ## Running it locally
