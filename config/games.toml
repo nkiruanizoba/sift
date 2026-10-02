@@ -1,0 +1,48 @@
+# Games for the Steam player feedback dataset.
+#
+# Rules: public data only, and no Activision, Blizzard, King, or Microsoft titles.
+# App IDs are checked against the Steam store by `python -m sift verify`.
+#
+# major_patches: fill these in on Day 1 from `python -m sift patches --game <appid>`.
+# Use the date the update went live (UTC, YYYY-MM-DD) and a short label.
+# Reviews are pulled from days_before to days_after around each patch, split
+# evenly under max_reviews. With no patches listed, the most recent reviews are pulled.
+#
+# Example:
+#   major_patches = [
+#     { date = "2025-01-15", label = "Update 1.2" },
+#   ]
+
+[defaults]
+max_reviews = 10000
+days_before = 30
+days_after = 30
+
+[[games]]
+appid = 553850
+name = "Helldivers 2"
+days_before = 21
+days_after = 21
+major_patches = [
+  { date = "2024-05-03", label = "Account Linking Update" },
+  { date = "2024-08-06", label = "Escalation of Freedom (1.001.002)" },
+  { date = "2024-09-17", label = "Patch 1.001.100" },
+]
+
+[[games]]
+appid = 1091500
+name = "Cyberpunk 2077"
+major_patches = [
+  { date = "2021-03-29", label = "Patch 1.2" },
+  { date = "2022-09-06", label = "Edgerunners Update (1.6)" },
+  { date = "2023-09-21", label = "Update 2.0" },
+]
+
+[[games]]
+appid = 275850
+name = "No Man's Sky"
+major_patches = [
+  { date = "2016-11-27", label = "Foundation Update" },
+  { date = "2018-07-26", label = "NEXT Update" },
+  { date = "2024-07-17", label = "Worlds Part I (5.0)" },
+]
