@@ -1,0 +1,21 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+.pytest_cache/
+
+# Local data (never committed: raw reviews, logs, databases)
+data/*
+!data/.gitkeep
+
+# Secrets
+.env
+
+# OS and editors
+.DS_Store
+.vscode/
+.idea/
+
+# Streamlit secrets (API keys)
+.streamlit/secrets.toml
